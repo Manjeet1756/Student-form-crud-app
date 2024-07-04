@@ -1,4 +1,4 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app';//module of the fire base library
 import { getFirestore } from 'firebase/firestore';
 
 // Import the functions you need from the SDKs you need

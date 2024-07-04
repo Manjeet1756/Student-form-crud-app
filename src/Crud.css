@@ -67,6 +67,7 @@ body{
 
     padding:10px 20px;
     width:100%;
+    
 }
 .database h2{
 
@@ -77,6 +78,7 @@ body{
 .database .container{
     display:flex;
     justify-content:space-between;
+   
 
     flex-wrap:wrap;
     max-width:100%;
