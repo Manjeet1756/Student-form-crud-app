@@ -147,11 +147,17 @@ const Crud = () => {
       <div className="database">
         <h2>CRUD database</h2>
         <div className="container">
+          <div className= "title">
+          <h3>Names</h3>
+          <h3>Emails</h3>
+          <h3>Phone NO.</h3>
+          <h3>Modifiy Data</h3>
+          </div>
           {fetchData.map((data) => (
             <div className="box" key={data.id}>
-              <h3>Name: {data.Name}</h3>
-              <h3>Email: {data.Email}</h3>
-              <h3>Phone: {data.Phone}</h3>
+              <h3>{data.Name}</h3>
+              <h3>{data.Email}</h3>
+              <h3>{data.Phone}</h3>
               <button onClick={() => passData(data.id)}>Update</button>
               <button onClick={() => del(data.id)}>Delete</button>
             </div>
