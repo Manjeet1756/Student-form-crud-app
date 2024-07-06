@@ -1,6 +1,3 @@
-
-
-
 import React, { useState, useEffect } from "react";
 import { db } from "./firebase";
 import {
@@ -9,7 +6,9 @@ import {
   getDocs,
   updateDoc,
   deleteDoc,
-  addDoc
+  addDoc,
+  query,
+  where,
 } from "firebase/firestore";
 import "./Crud.css";
 
@@ -19,6 +18,36 @@ const Crud = () => {
   const [phone, setPhone] = useState("");
   const [fetchData, setFetchData] = useState([]);
   const [id, setId] = useState("");
+  const [search, setSearch] = useState("");
+  const [results, setResults] = useState([]);
+
+  const handleChange = (event) => {
+    setSearch(event.target.value);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (search === "") {
+        setResults([]);
+        return;
+      }
+
+      const q = query(
+        collection(db, "StudentForm"),
+        where("name", ">=", search),
+        where("name", "<=", search + "\uf8ff")
+      );
+
+      const querySnapshot = await getDocs(q);
+      const data = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setResults(data);
+    };
+
+    fetchData();
+  }, [search]);
 
   // Database reference
   const dbref = collection(db, "StudentForm");
@@ -27,9 +56,9 @@ const Crud = () => {
   const add = async () => {
     try {
       const addData = await addDoc(dbref, {
-        Name: name,
-        Email: email,
-        Phone: phone
+        name: name,
+        email: email,
+        phone: phone,
       });
       if (addData) {
         alert("Data saved successfully");
@@ -49,8 +78,10 @@ const Crud = () => {
       const snapshot = await getDocs(dbref);
       const fetchData = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
+      // Sort data by name
+      fetchData.sort((a, b) => a.name.localeCompare(b.name));
       setFetchData(fetchData);
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -66,9 +97,9 @@ const Crud = () => {
   const passData = (id) => {
     const matchId = fetchData.find((data) => data.id === id);
     if (matchId) {
-      setName(matchId.Name);
-      setEmail(matchId.Email);
-      setPhone(matchId.Phone);
+      setName(matchId.name);
+      setEmail(matchId.email);
+      setPhone(matchId.phone);
       setId(matchId.id);
     }
   };
@@ -78,9 +109,9 @@ const Crud = () => {
     try {
       const updateref = doc(db, "StudentForm", id);
       await updateDoc(updateref, {
-        Name: name,
-        Email: email,
-        Phone: phone
+        name: name,
+        email: email,
+        phone: phone,
       });
       alert("Data updated successfully");
       fetch(); // Fetch updated data after updating
@@ -144,22 +175,49 @@ const Crud = () => {
         <button onClick={add}>Add</button>
         <button onClick={update}>Update</button>
       </div>
+      <div
+        style={{
+          height: "200px",
+          width: "100%",
+          padding: "50px",
+          boxSizing: "border-box",
+        }}
+      >
+        <input
+          style={{ fontSize: "20px", outline: "2px solid black" }}
+          type="text"
+          placeholder="Search by name"
+          value={search}
+          onChange={handleChange}
+        />
+        <ul style={{ listStyle: "none" }}>
+          {results.map((result) => (
+            <li key={result.id}>
+              {result.name} , {result.email} , {result.phone}
+            </li>
+          ))}
+        </ul>
+      </div>
       <div className="database">
         <h2>CRUD database</h2>
         <div className="container">
-          <div className= "title">
-          <h3>Names</h3>
-          <h3>Emails</h3>
-          <h3>Phone NO.</h3>
-          <h3>Modifiy Data</h3>
+          <div className="title">
+            <h3>Names</h3>
+            <h3>Emails</h3>
+            <h3>Phone NO.</h3>
+            <h3>Modify Data</h3>
           </div>
           {fetchData.map((data) => (
             <div className="box" key={data.id}>
-              <h3>{data.Name}</h3>
-              <h3>{data.Email}</h3>
-              <h3>{data.Phone}</h3>
-              <button onClick={() => passData(data.id)}>Update</button>
-              <button onClick={() => del(data.id)}>Delete</button>
+              <h3>{data.name}</h3>
+              <h3>{data.email}</h3>
+              <h3>{data.phone}</h3>
+              <button className="update" onClick={() => passData(data.id)}>
+                Update
+              </button>
+              <button className="delete" onClick={() => del(data.id)}>
+                Delete
+              </button>
             </div>
           ))}
         </div>
